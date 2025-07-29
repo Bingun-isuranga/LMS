@@ -1,0 +1,2149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles to ensure Inter font and smooth transitions */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f3f4f6;
+            background-size: cover;                  /* Make image cover the whole area */
+            background-repeat: no-repeat;            /* Prevent repeating */
+            background-position: center center;      /* Center the image */
+            display: flex;
+            min-height: 100vh;
+            
+        }
+        #dashboard-section {
+            background-image: url('background.jpg');
+            
+            background-repeat: no-repeat;
+            background-position: center center;
+            
+            min-height: 650px; /* Adjust as needed */
+      }
+        .sidebar {
+            width: 250px;
+            background-color: #1f2937; /* Darker gray for sidebar */
+            color: #ffffff;
+            padding: 1.5rem 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+        }
+        .sidebar-header {
+            padding: 1rem 1.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #a78bfa; /* Purple accent */
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #374151;
+            text-align: center;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            border-radius: 0.5rem; /* Rounded corners for nav items */
+            margin: 0.25rem 1rem;
+        }
+        .nav-item:hover, .nav-item.active {
+            background-color: #374151; /* Lighter gray on hover/active */
+            color: #a78bfa; /* Purple text on hover/active */
+        }
+        .nav-item svg {
+            margin-right: 0.75rem;
+            width: 20px;
+            height: 20px;
+            fill: currentColor; /* Use current text color for SVG */
+        }
+        .content {
+            margin-left: 250px; /* Offset content by sidebar width */
+            flex-grow: 1;
+            padding: 2rem;
+            background-color: #f9fafb;
+            border-radius: 0.75rem; /* Rounded corners for content area */
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            margin-right: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow-y: auto; /* Enable scrolling for content if needed */
+        }
+        .section {
+            display: none; /* Hidden by default */
+        }
+        .section.active {
+            display: block; /* Show active section */
+        }
+        .table-container {
+            overflow-x: auto; /* Enable horizontal scrolling for tables on small screens */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            overflow: hidden; /* Ensures rounded corners apply to table content */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+            color: #374151;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background-color: #a78bfa; /* Purple */
+            color: #ffffff;
+        }
+        .btn-primary:hover {
+            background-color: #8b5cf6; /* Darker purple */
+            transform: translateY(-1px);
+        }
+        .btn-danger {
+            background-color: #ef4444; /* Red */
+            color: #ffffff;
+        }
+        .btn-danger:hover {
+            background-color: #dc2626; /* Darker red */
+            transform: translateY(-1px);
+        }
+        .btn-success {
+            background-color: #22c55e; /* Green */
+            color: #ffffff;
+        }
+        .btn-success:hover {
+            background-color: #16a34a; /* Darker green */
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background-color: #6b7280; /* Gray */
+            color: #ffffff;
+        }
+        .btn-secondary:hover {
+            background-color: #4b5563; /* Darker gray */
+            transform: translateY(-1px);
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #a78bfa;
+            box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.3);
+        }
+        /* Modal styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                box-shadow: none;
+                border-bottom: 1px solid #374151;
+            }
+            .content {
+                margin-left: 0;
+                margin-top: 0;
+                margin-right: 0;
+                padding: 1rem;
+                border-radius: 0;
+                box-shadow: none;
+            }
+            .sidebar-header {
+                margin-bottom: 0.5rem;
+            }
+            .nav-item {
+                margin: 0.25rem 0.5rem;
+                padding: 0.5rem 1rem;
+            }
+            .sidebar-nav {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+        /* Styles for login/signup page */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            width: 100%;
+            background-color: #f3f4f6;
+        }
+        .auth-card {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .auth-card h2 {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: #374151;
+        }
+        .auth-card .form-group {
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+        .auth-card .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+        .auth-card .btn {
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+        .auth-card .text-sm {
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="auth-page" class="auth-container">
+        <div class="auth-card">
+            <h2 id="auth-title">Login</h2>
+            <form id="auth-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group" id="role-group" style="display: none;">
+                    <label for="role">Role</label>
+                    <select id="role" name="role" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
+                        <option value="student">Student</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <!-- New fields for student signup -->
+                <div id="student-signup-details" style="display: none;">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">Student Details</h3>
+                    <div class="form-group">
+                        <label for="signup-name">Full Name</label>
+                        <input type="text" id="signup-name" name="signupName">
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-admission-number">Admission Number</label>
+                        <input type="text" id="signup-admission-number" name="signupAdmissionNumber">
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-birthday">Birthday</label>
+                        <input type="date" id="signup-birthday" name="signupBirthday">
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-telephone">Telephone Number</label>
+                        <input type="tel" id="signup-telephone" name="signupTelephone">
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-address">Address</label>
+                        <textarea id="signup-address" name="signupAddress" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-gender">Gender</label>
+                        <select id="signup-gender" name="signupGender" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
+                            <option value="">-- Select Gender --</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-grade">Grade</label>
+                        <input type="text" id="signup-grade" name="signupGrade">
+                    </div>
+                </div>
+                <div id="admin-signup-message" class="text-red-500 text-sm mt-2" style="display: none;">
+                    Admin accounts cannot be created. Please use the default admin login.
+                </div>
+                <button type="submit" class="btn btn-primary" id="auth-submit-btn">Login</button>
+            </form>
+            <p class="text-sm text-gray-600 mt-4">
+                <span id="toggle-auth-message">Don't have an account?</span>
+                <a href="#" id="toggle-auth-link" class="text-purple-600 hover:underline">Sign Up</a>
+            </p>
+        </div>
+    </div>
+
+    <aside class="sidebar" style="display: none;">
+        <div class="sidebar-header">
+          KannangaraLib  
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-item active" id="nav-dashboard">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+                Dashboard
+            </div>
+            <div class="nav-item" id="nav-books">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 19h16V5H4v14zm8-12h6v2h-6V7zm0 4h6v2h-6v-2zm0 4h6v2h-6v-2zM6 7h2v2H6V7zm0 4h2v2H6v-2zm0 4h2v2H6v-2z"/></svg>
+                Books
+            </div>
+            <div class="nav-item admin-only" id="nav-add-book">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                Add Book
+            </div>
+            <div class="nav-item" id="nav-issue-book">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15H9v-2h2v2zm0-4H9v-2h2v2zm0-4H9V7h2v2zm4 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V7h2v2z"/></svg>
+                Issue Book
+            </div>
+            <div class="nav-item admin-only" id="nav-members">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                Members
+            </div>
+            <div class="nav-item admin-only" id="nav-add-member">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2zM12 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                Add Member
+            </div>
+            <div class="nav-item admin-only" id="nav-teachers">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99A5 5 0 0 1 7 12a5 5 0 0 1 5-5 5 5 0 0 1 5 5 5 5 0 0 1-5 5zm0-2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>
+                Teachers
+            </div>
+            <div class="nav-item admin-only" id="nav-add-teacher">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2zM12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+                Add Teacher
+            </div>
+            <div class="nav-item" id="nav-transactions">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                Transactions
+            </div>
+            <div class="nav-item" id="nav-logout">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+                Logout
+            </div>
+        </nav>
+    </aside>
+
+    <main class="content" style="display: none;">
+        <section id="dashboard-section" class="section active">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">Dashboard</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-600">Borrowed Books</h3>
+                        <p id="borrowed-books-count" class="text-4xl font-bold text-blue-600 mt-2">0</p>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-400" viewBox="0 0 24 24" fill="currentColor"><path d="M13 12h7v1.5h-7zm0-2.5h7V11h-7zm0-2.5h7V8.5h-7zM21 4H3c-1.1 0-2 .9-2 2v13c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 15h-9V6h9v13z"/></svg>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-600">Total Books</h3>
+                        <p id="total-books-count" class="text-4xl font-bold text-green-600 mt-2">0</p>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-green-400" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H6V4h12v16zM9 7h6v2H9zm0 4h6v2H9zm0 4h6v2H9z"/></svg>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-600">Total Members</h3>
+                        <p id="total-members-count" class="text-4xl font-bold text-purple-600 mt-2">0</p>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-purple-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </div>
+            </div>
+        </section>
+
+        <section id="books-section" class="section">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">Books</h2>
+            <div class="mb-4 flex items-center">
+                <input type="text" id="book-search" placeholder="Search by title, author, or ISBN..." class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
+                <button onclick="renderBooksTable()" class="ml-3 btn btn-primary">Search</button>
+            </div>
+            <div class="table-container">
+                <table id="books-table">
+                    <thead>
+                        <tr>
+                            <th>Book ID</th>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>ISBN</th>
+                            <th>Publisher</th>
+                            <th>Stock</th>
+                            <th class="admin-only">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="add-book-section" class="section">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">Add New Book</h2>
+            <form id="add-book-form" class="bg-white p-6 rounded-lg shadow-md">
+                <div class="form-group">
+                    <label for="book-id">Book ID</label>
+                    <input type="text" id="book-id" name="id" required>
+                </div>
+                <div class="form-group">
+                    <label for="book-title">Book Title</label>
+                    <input type="text" id="book-title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="book-author">Author</label>
+                    <input type="text" id="book-author" name="author" required>
+                </div>
+                <div class="form-group">
+                    <label for="book-isbn">ISBN</label>
+                    <input type="text" id="book-isbn" name="isbn" required>
+                </div>
+                <div class="form-group">
+                    <label for="book-publisher">Publisher</label>
+                    <input type="text" id="book-publisher" name="publisher" required>
+                </div>
+                <div class="form-group">
+                    <label for="book-pages">Pages</label>
+                    <input type="number" id="book-pages" name="pages" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="book-stock">Stock</label>
+                    <input type="number" id="book-stock" name="stock" min="0" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-full mt-4">Add Book</button>
+            </form>
+        </section>
+
+        <section id="issue-book-section" class="section">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">Issue Book</h2>
+            <form id="issue-book-form" class="bg-white p-6 rounded-lg shadow-md">
+                <div class="form-group">
+                    <label for="transaction-id">Transaction ID</label>
+                    <input type="text" id="transaction-id" name="id">
+                </div>
+                <div class="form-group">
+                    <label for="issue-book-select">Select Book</label>
+                    <select id="issue-book-select" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
+                        <option value="">-- Select a Book --</option>
+                        </select>
+                </div>
+                <div class="form-group">
+                    <label for="issue-recipient-select">Select Recipient</label>
+                    <select id="issue-recipient-select" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
+                        <option value="">-- Select a Recipient --</option>
+                        </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-full mt-4">Issue Book</button>
+            </form>
+        </section>
+
+        <section id="members-section" class="section">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">Members</h2>
+            <div class="mb-4 flex items-center">
+                <input type="text" id="member-search" placeholder="Search by name or admission number..." class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
+                <button onclick="renderMembersTable()" class="ml-3 btn btn-primary">Search</button>
+            </div>
+            <div class="table-container">
+                <table id="members-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Admission Number</th>
+                            <th>Birthday</th>
+                            <th>Telephone</th>
+                            <th>Address</th>
+                            <th>Gender</th>
+                            <th>Grade</th>
+                            <th class="admin-only">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="add-member-section" class="section">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">Add New Member</h2>
+            <form id="add-member-form" class="bg-white p-6 rounded-lg shadow-md">
+                <div class="form-group">
+                    <label for="member-name">Name</label>
+                    <input type="text" id="member-name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="member-admission-number">Admission Number</label>
+                    <input type="text" id="member-admission-number" name="admissionNumber" required>
+                </div>
+                <div class="form-group">
+                    <label for="member-birthday">Birthday</label>
+                    <input type="date" id="member-birthday" name="birthday" required>
+                </div>
+                <div class="form-group">
+                    <label for="member-telephone">Telephone Number</label>
+                    <input type="tel" id="member-telephone" name="telephone" required>
+                </div>
+                <div class="form-group">
+                    <label for="member-address">Address</label>
+                    <textarea id="member-address" name="address" rows="3" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="member-gender">Gender</label>
+                    <select id="member-gender" name="gender" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
+                        <option value="">-- Select Gender --</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="member-grade">Grade</label>
+                    <input type="text" id="member-grade" name="grade" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-full mt-4">Add Member</button>
+            </form>
+        </section>
+
+        <!-- New Teachers Section -->
+        <section id="teachers-section" class="section">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">Teachers</h2>
+            <div class="mb-4 flex items-center">
+                <input type="text" id="teacher-search" placeholder="Search by tag name or tag number..." class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
+                <button onclick="renderTeachersTable()" class="ml-3 btn btn-primary">Search</button>
+            </div>
+            <div class="table-container">
+                <table id="teachers-table">
+                    <thead>
+                        <tr>
+                            <th>Tag Name</th>
+                            <th>Tag Number</th>
+                            <th>Grade</th>
+                            <th class="admin-only">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- New Add Teacher Section -->
+        <section id="add-teacher-section" class="section">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">Add New Teacher</h2>
+            <form id="add-teacher-form" class="bg-white p-6 rounded-lg shadow-md">
+                <div class="form-group">
+                    <label for="teacher-tag-name">Tag Name</label>
+                    <input type="text" id="teacher-tag-name" name="tagName" required>
+                </div>
+                <div class="form-group">
+                    <label for="teacher-tag-number">Tag Number</label>
+                    <input type="text" id="teacher-tag-number" name="tagNumber" required>
+                </div>
+                <div class="form-group">
+                    <label for="teacher-grade">Grade</label>
+                    <input type="text" id="teacher-grade" name="grade" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-full mt-4">Add Teacher</button>
+            </form>
+        </section>
+
+        <section id="transactions-section" class="section">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">Transactions</h2>
+            <div class="table-container">
+                <table id="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Book Title</th>
+                            <th>Recipient Name</th>
+                            <th>Recipient Type</th>
+                            <th>Issue Date</th>
+                            <th>Return Date</th>
+                            <th>Status</th>
+                            <th class="admin-only">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <div id="confirmation-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3 class="text-xl font-bold mb-4">Confirm Action</h3>
+            <p id="modal-message" class="mb-6"></p>
+            <div class="flex justify-end space-x-4">
+                <button id="modal-cancel-btn" class="btn btn-secondary">Cancel</button>
+                <button id="modal-confirm-btn" class="btn btn-danger">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-book-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3 class="text-xl font-bold mb-4">Edit Book</h3>
+            <form id="edit-book-form" class="bg-white p-6 rounded-lg shadow-md">
+                <input type="hidden" id="edit-book-id">
+                <div class="form-group">
+                    <label for="edit-book-title">Book Title</label>
+                    <input type="text" id="edit-book-title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-book-author">Author</label>
+                    <input type="text" id="edit-book-author" name="author" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-book-isbn">ISBN</label>
+                    <input type="text" id="edit-book-isbn" name="isbn" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-book-publisher">Publisher</label>
+                    <input type="text" id="edit-book-publisher" name="publisher" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-book-pages">Pages</label>
+                    <input type="number" id="edit-book-pages" name="pages" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-book-stock">Stock</label>
+                    <input type="number" id="edit-book-stock" name="stock" min="0" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-full mt-4">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="edit-member-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3 class="text-xl font-bold mb-4">Edit Member</h3>
+            <form id="edit-member-form" class="bg-white p-6 rounded-lg shadow-md">
+                <div class="form-group">
+                    <label for="edit-member-name">Name</label>
+                    <input type="text" id="edit-member-name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-member-admission-number">Admission Number</label>
+                    <input type="text" id="edit-member-admission-number" name="admissionNumber" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-member-birthday">Birthday</label>
+                    <input type="date" id="edit-member-birthday" name="birthday" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-member-telephone">Telephone Number</label>
+                    <input type="tel" id="edit-member-telephone" name="telephone" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-member-address">Address</label>
+                    <textarea id="edit-member-address" name="address" rows="3" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-member-gender">Gender</label>
+                    <select id="edit-member-gender" name="gender" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
+                        <option value="">-- Select Gender --</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-member-grade">Grade</label>
+                    <input type="text" id="edit-member-grade" name="grade" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-full mt-4">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- New Edit Teacher Modal -->
+    <div id="edit-teacher-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3 class="text-xl font-bold mb-4">Edit Teacher</h3>
+            <form id="edit-teacher-form" class="bg-white p-6 rounded-lg shadow-md">
+                <input type="hidden" id="edit-teacher-original-tag-number">
+                <div class="form-group">
+                    <label for="edit-teacher-tag-name">Tag Name</label>
+                    <input type="text" id="edit-teacher-tag-name" name="tagName" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-teacher-tag-number">Tag Number</label>
+                    <input type="text" id="edit-teacher-tag-number" name="tagNumber" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-teacher-grade">Grade</label>
+                    <input type="text" id="edit-teacher-grade" name="grade" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-full mt-4">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global data arrays for books, members, transactions, users, and teachers
+        let books = [];
+        let members = [];
+        let transactions = [];
+        let users = []; // New array to store users (for demonstration, not secure)
+        let teachers = []; // New array to store teacher data
+        let currentUser = null; // Stores logged-in user info
+
+        // --- Utility Functions ---
+
+        /**
+         * Generates a simple unique ID.
+         * @returns {string} A unique ID.
+         */
+        function generateUniqueId() {
+            return Date.now().toString(36) + Math.random().toString(36).substring(2);
+        }
+
+        /**
+         * Saves the current state of books, members, transactions, users, and teachers to localStorage.
+         */
+        function saveData() {
+            try {
+                localStorage.setItem('libraryBooks', JSON.stringify(books));
+                localStorage.setItem('libraryMembers', JSON.stringify(members));
+                localStorage.setItem('libraryTransactions', JSON.stringify(transactions));
+                localStorage.setItem('libraryUsers', JSON.stringify(users)); // Save users
+                localStorage.setItem('libraryTeachers', JSON.stringify(teachers)); // Save teachers
+                console.log("Data saved to localStorage.");
+            } catch (e) {
+                console.error("Error saving data to localStorage:", e);
+                showModal("Error", "Could not save data. Your browser's storage might be full or disabled.", false);
+            }
+        }
+
+        /**
+         * Loads data from localStorage into the global arrays.
+         */
+        function loadData() {
+            try {
+                const storedBooks = localStorage.getItem('libraryBooks');
+                const storedMembers = localStorage.getItem('libraryMembers');
+                const storedTransactions = localStorage.getItem('libraryTransactions');
+                const storedUsers = localStorage.getItem('libraryUsers'); // Load users
+                const storedTeachers = localStorage.getItem('libraryTeachers'); // Load teachers
+
+                books = storedBooks ? JSON.parse(storedBooks) : [];
+                members = storedMembers ? JSON.parse(storedMembers) : [];
+                transactions = storedTransactions ? JSON.parse(storedTransactions) : [];
+                users = storedUsers ? JSON.parse(storedUsers) : []; // Parse users
+                teachers = storedTeachers ? JSON.parse(storedTeachers) : []; // Parse teachers
+                console.log("Data loaded from localStorage.");
+
+                // Ensure a default admin user exists
+                if (!users.some(user => user.username === 'admin' && user.role === 'admin')) {
+                    users.push({ username: 'admin', password: 'admin123', role: 'admin' });
+                    saveData(); // Save immediately after adding default admin
+                    console.log("Default admin user added.");
+                }
+
+            } catch (e) {
+                console.error("Error loading data from localStorage:", e);
+                showModal("Error", "Could not load data. Local storage might be corrupted.", false);
+                // Reset data if corrupted
+                books = [];
+                members = [];
+                transactions = [];
+                users = [];
+                teachers = [];
+            }
+        }
+
+        /**
+         * Shows a specific section and hides others.
+         * Also updates active state of navigation items.
+         * @param {string} sectionId - The ID of the section to show (e.g., 'dashboard-section').
+         */
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            // Show the requested section
+            document.getElementById(sectionId).classList.add('active');
+
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            // Add active class to the corresponding nav item
+            const navItem = document.getElementById(`nav-${sectionId.replace('-section', '')}`);
+            if (navItem) {
+                navItem.classList.add('active');
+            }
+
+
+            // Call render functions for the displayed section
+            if (sectionId === 'dashboard-section') {
+                renderDashboard();
+            } else if (sectionId === 'books-section') {
+                renderBooksTable();
+            } else if (sectionId === 'members-section') {
+                renderMembersTable();
+            } else if (sectionId === 'transactions-section') {
+                renderTransactionsTable();
+            } else if (sectionId === 'issue-book-section') {
+                renderIssueBookForm();
+            } else if (sectionId === 'teachers-section') { // New: Render teachers table
+                renderTeachersTable();
+            }
+            updateUIBasedOnRole();
+        }
+
+        // --- Authentication Functions ---
+        const authPage = document.getElementById('auth-page');
+        const mainContent = document.querySelector('main.content');
+        const sidebar = document.querySelector('aside.sidebar');
+        const authTitle = document.getElementById('auth-title');
+        const authForm = document.getElementById('auth-form');
+        const authSubmitBtn = document.getElementById('auth-submit-btn');
+        const toggleAuthMessage = document.getElementById('toggle-auth-message');
+        const toggleAuthLink = document.getElementById('toggle-auth-link');
+        const roleGroup = document.getElementById('role-group');
+        const studentSignupDetails = document.getElementById('student-signup-details');
+        const adminSignupMessage = document.getElementById('admin-signup-message');
+        const authUsernameInput = document.getElementById('username');
+        const authPasswordInput = document.getElementById('password');
+
+
+        let isLoginMode = true;
+
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            if (isLoginMode) {
+                authTitle.textContent = 'Login';
+                authSubmitBtn.textContent = 'Login';
+                toggleAuthMessage.textContent = "Don't have an account?";
+                toggleAuthLink.textContent = "Sign Up";
+                roleGroup.style.display = 'none'; // Hide role for login
+                studentSignupDetails.style.display = 'none'; // Hide student details for login
+                adminSignupMessage.style.display = 'none'; // Hide admin message
+
+                authUsernameInput.style.display = 'block'; // Show username/password for login
+                authPasswordInput.style.display = 'block';
+                authUsernameInput.setAttribute('required', 'required');
+                authPasswordInput.setAttribute('required', 'required');
+                authSubmitBtn.disabled = false; // Enable login button
+
+                // Remove required attribute for signup fields
+                document.getElementById('signup-name').removeAttribute('required');
+                document.getElementById('signup-admission-number').removeAttribute('required');
+                document.getElementById('signup-birthday').removeAttribute('required');
+                document.getElementById('signup-telephone').removeAttribute('required');
+                document.getElementById('signup-address').removeAttribute('required');
+                document.getElementById('signup-gender').removeAttribute('required'); // New
+                document.getElementById('signup-grade').removeAttribute('required'); // New
+            } else {
+                authTitle.textContent = 'Sign Up';
+                authSubmitBtn.textContent = 'Sign Up';
+                toggleAuthMessage.textContent = "Already have an account?";
+                toggleAuthLink.textContent = "Login";
+                roleGroup.style.display = 'block'; // Show role for signup
+                
+                // Reset visibility based on initial role selection (student by default)
+                handleRoleChange();
+            }
+            authForm.reset(); // Clear form fields on mode switch
+        }
+
+        // Listen for changes on the role select to toggle student details and admin message
+        document.getElementById('role').addEventListener('change', handleRoleChange);
+
+        function handleRoleChange() {
+            const selectedRole = document.getElementById('role').value;
+            if (!isLoginMode) { // Only apply if in signup mode
+                if (selectedRole === 'student') {
+                    studentSignupDetails.style.display = 'block';
+                    adminSignupMessage.style.display = 'none';
+                    authUsernameInput.style.display = 'block'; // Show username/password for student signup
+                    authPasswordInput.style.display = 'block';
+                    authUsernameInput.setAttribute('required', 'required'); // Username is admission number for student
+                    authPasswordInput.setAttribute('required', 'required');
+                    authSubmitBtn.disabled = false; // Enable signup button for student
+
+                    document.getElementById('signup-name').setAttribute('required', 'required');
+                    document.getElementById('signup-admission-number').setAttribute('required', 'required');
+                    document.getElementById('signup-birthday').setAttribute('required', 'required');
+                    document.getElementById('signup-telephone').setAttribute('required', 'required');
+                    document.getElementById('signup-address').setAttribute('required', 'required');
+                    document.getElementById('signup-gender').setAttribute('required', 'required'); // New
+                    document.getElementById('signup-grade').setAttribute('required', 'required'); // New
+                } else if (selectedRole === 'admin') {
+                    studentSignupDetails.style.display = 'none';
+                    adminSignupMessage.style.display = 'block'; // Show admin signup message
+                    authUsernameInput.style.display = 'none'; // Hide username/password for admin signup
+                    authPasswordInput.style.display = 'none';
+                    authUsernameInput.removeAttribute('required');
+                    authPasswordInput.removeAttribute('required');
+                    authSubmitBtn.disabled = true; // Disable signup button for admin
+
+                    // Remove required attribute for student signup fields
+                    document.getElementById('signup-name').removeAttribute('required');
+                    document.getElementById('signup-admission-number').removeAttribute('required');
+                    document.getElementById('signup-birthday').removeAttribute('required');
+                    document.getElementById('signup-telephone').removeAttribute('required');
+                    document.getElementById('signup-address').removeAttribute('required');
+                    document.getElementById('signup-gender').removeAttribute('required'); // New
+                    document.getElementById('signup-grade').removeAttribute('required'); // New
+                }
+            }
+        }
+
+
+        function handleAuthSubmit(event) {
+            event.preventDefault();
+            const username = authForm.username.value.trim();
+            const password = authForm.password.value;
+            const role = authForm.role ? authForm.role.value : 'student'; // Default to student if role not shown (login)
+
+            if (isLoginMode) {
+                // Login logic
+                const user = users.find(u => u.username === username && u.password === password); // Insecure: no hashing
+                if (user) {
+                    currentUser = user;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    showModal("Success", `Welcome, ${currentUser.username} (${currentUser.role})!`);
+                    showMainApp();
+                } else {
+                    showModal("Error", "Invalid username or password.", false);
+                }
+            } else {
+                // Signup logic
+                if (role === 'admin') {
+                    showModal("Error", "Admin accounts cannot be created. Please use the default admin login.", false);
+                    return;
+                }
+
+                if (users.some(u => u.username === username)) {
+                    showModal("Error", "Username already exists.", false);
+                    return;
+                }
+
+                if (role === 'student') {
+                    const signupName = document.getElementById('signup-name').value.trim();
+                    const signupAdmissionNumber = document.getElementById('signup-admission-number').value.trim();
+                    const signupBirthday = document.getElementById('signup-birthday').value;
+                    const signupTelephone = document.getElementById('signup-telephone').value.trim();
+                    const signupAddress = document.getElementById('signup-address').value.trim();
+                    const signupGender = document.getElementById('signup-gender').value; // New
+                    const signupGrade = document.getElementById('signup-grade').value.trim(); // New
+
+                    if (!signupName || !signupAdmissionNumber || !signupBirthday || !signupTelephone || !signupAddress || !signupGender || !signupGrade) {
+                        showModal("Error", "Please fill in all student details for registration.", false);
+                        return;
+                    }
+
+                    // Check for duplicate admission number for members
+                    if (members.some(member => member.admissionNumber === signupAdmissionNumber)) {
+                        showModal("Error", "A member with this admission number already exists.", false);
+                        return;
+                    }
+
+                    // Create new member record
+                    const newMember = {
+                        name: signupName,
+                        admissionNumber: signupAdmissionNumber,
+                        birthday: signupBirthday,
+                        telephone: signupTelephone,
+                        address: signupAddress,
+                        gender: signupGender, // New
+                        grade: signupGrade // New
+                    };
+                    members.push(newMember);
+
+                    // Create user account, linking username to admission number for students
+                    const newUser = { username: signupAdmissionNumber, password, role }; // Username is admission number for students
+                    users.push(newUser);
+
+                    saveData();
+                    showModal("Success", "Student account and member record created successfully! Please log in using your Admission Number as Username.");
+                    isLoginMode = true; // Switch to login mode after signup
+                    toggleAuthMode(); // Update UI
+                    authForm.reset();
+                } else { // This else block should ideally not be reached if admin signup is prevented
+                    const newUser = { username, password, role };
+                    users.push(newUser);
+                    saveData();
+                    showModal("Success", "Account created successfully! Please log in.");
+                    isLoginMode = true; // Switch to login mode after signup
+                    toggleAuthMode(); // Update UI
+                    authForm.reset();
+                }
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            showAuthPage();
+            showModal("Logged Out", "You have been logged out successfully.");
+        }
+
+        function showAuthPage() {
+            authPage.style.display = 'flex';
+            mainContent.style.display = 'none';
+            sidebar.style.display = 'none';
+            document.body.style.removeProperty('display'); // Reset body flex for auth page
+            document.body.style.removeProperty('min-height');
+            document.body.style.removeProperty('background-image');
+            document.body.style.removeProperty('background-repeat');
+            document.body.style.removeProperty('background-position');
+            document.body.style.removeProperty('background-size');
+        }
+
+        function showMainApp() {
+            authPage.style.display = 'none';
+            mainContent.style.display = 'block';
+            sidebar.style.display = 'flex';
+            document.body.style.display = 'flex'; // Restore body flex for main app
+            document.body.style.minHeight = '100vh';
+            // Set background for dashboard
+            document.getElementById('dashboard-section').style.backgroundImage = "url('background.jpg')";
+            document.getElementById('dashboard-section').style.backgroundSize = "cover";
+            document.getElementById('dashboard-section').style.backgroundRepeat = "no-repeat";
+            document.getElementById('dashboard-section').style.backgroundPosition = "center center";
+
+            showSection('dashboard-section'); // Go to dashboard after login
+            updateUIBasedOnRole();
+        }
+
+        function updateUIBasedOnRole() {
+            const adminElements = document.querySelectorAll('.admin-only');
+            if (currentUser && currentUser.role === 'admin') {
+                adminElements.forEach(el => el.style.display = ''); // Show if admin
+                // Ensure table headers are displayed as table-cell or table-row
+                document.querySelectorAll('#books-table th.admin-only, #members-table th.admin-only, #transactions-table th.admin-only, #teachers-table th.admin-only').forEach(th => th.style.display = 'table-cell');
+            } else {
+                adminElements.forEach(el => el.style.display = 'none'); // Hide if not admin
+                // Hide table headers specifically for admin actions
+                document.querySelectorAll('#books-table th.admin-only, #members-table th.admin-only, #transactions-table th.admin-only, #teachers-table th.admin-only').forEach(th => th.style.display = 'none');
+            }
+
+             // Adjust display of action buttons within tables
+             renderBooksTable();
+             renderMembersTable();
+             renderTransactionsTable();
+             renderTeachersTable(); // New: Render teachers table to apply role-based visibility
+        }
+
+        // --- Dashboard Functions ---
+
+        /**
+         * Renders the dashboard counts.
+         */
+        function renderDashboard() {
+            const borrowedBooksCount = transactions.filter(t => !t.returnDate).length;
+            const totalBooksCount = books.length;
+            const totalMembersCount = members.length;
+
+            document.getElementById('borrowed-books-count').textContent = borrowedBooksCount;
+            document.getElementById('total-books-count').textContent = totalBooksCount;
+            document.getElementById('total-members-count').textContent = totalMembersCount;
+        }
+
+        // --- Books Functions ---
+
+        /**
+         * Renders the books table, applying search filter if present.
+         */
+        function renderBooksTable() {
+            const tableBody = document.querySelector('#books-table tbody');
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            const searchTerm = document.getElementById('book-search').value.toLowerCase();
+
+            const filteredBooks = books.filter(book =>
+                book.title.toLowerCase().includes(searchTerm) ||
+                book.author.toLowerCase().includes(searchTerm) ||
+                book.isbn.toLowerCase().includes(searchTerm) ||
+                book.publisher.toLowerCase().includes(searchTerm)
+            );
+
+            if (filteredBooks.length === 0) {
+                const row = tableBody.insertRow();
+                const cell = row.insertCell();
+                cell.colSpan = currentUser && currentUser.role === 'admin' ? 7 : 6; // Adjust colspan based on role
+                cell.textContent = "No books found.";
+                cell.className = "text-center text-gray-500 py-4";
+                return;
+            }
+
+            filteredBooks.forEach(book => {
+                const row = tableBody.insertRow();
+                const actionsHtml = currentUser && currentUser.role === 'admin' ? `
+                    <button onclick="openEditBookModal('${book.id}')" class="btn btn-secondary text-sm mr-2">Edit</button>
+                    <button onclick="confirmDeleteBook('${book.id}', '${book.title}')" class="btn btn-danger text-sm">Delete</button>
+                ` : '';
+                row.innerHTML = `
+                    <td class="py-2 px-4">${book.id}</td>
+                    <td class="py-2 px-4">${book.title}</td>
+                    <td class="py-2 px-4">${book.author}</td>
+                    <td class="py-2 px-4">${book.isbn}</td>
+                    <td class="py-2 px-4">${book.publisher}</td>
+                    <td class="py-2 px-4">${book.stock}</td>
+                    <td class="py-2 px-4 admin-only">${actionsHtml}</td>
+                `;
+                 // Manually hide if not admin, as display property is set by JS
+                if (currentUser && currentUser.role !== 'admin') {
+                    row.querySelector('.admin-only').style.display = 'none';
+                }
+            });
+        }
+
+        /**
+         * Handles the submission of the add book form.
+         * @param {Event} event - The form submission event.
+         */
+        function addBook(event) {
+            event.preventDefault();
+            if (currentUser && currentUser.role !== 'admin') {
+                showModal("Access Denied", "Only administrators can add books.", false);
+                return;
+            }
+            const form = event.target;
+            const newBook = {
+                id: form['id'].value.trim(), // Get ID from the new input field
+                title: form['title'].value,
+                author: form['author'].value,
+                isbn: form['isbn'].value,
+                publisher: form['publisher'].value,
+                pages: parseInt(form['pages'].value),
+                stock: parseInt(form['stock'].value)
+            };
+
+            if (!newBook.id) {
+                showModal("Error", "Book ID cannot be empty.", false);
+                return;
+            }
+
+            // Basic validation for stock
+            if (newBook.stock < 0) {
+                showModal("Error", "Stock cannot be negative.", false);
+                return;
+            }
+
+            // Check for duplicate Book ID
+            if (books.some(book => book.id === newBook.id)) {
+                showModal("Error", "A book with this ID already exists.", false);
+                return;
+            }
+
+            // Check for duplicate ISBN
+            if (books.some(book => book.isbn === newBook.isbn)) {
+                showModal("Error", "A book with this ISBN already exists.", false);
+                return;
+            }
+
+            books.push(newBook);
+            saveData();
+            form.reset(); // Clear the form
+            renderBooksTable(); // Re-render the books table
+            renderDashboard(); // Update dashboard counts
+            showModal("Success", `Book "${newBook.title}" added successfully!`);
+            showSection('books-section'); // Navigate to books section
+        }
+
+        /**
+         * Opens the edit book modal and populates it with book data.
+         * @param {string} bookId - The ID of the book to edit.
+         */
+        function openEditBookModal(bookId) {
+            if (currentUser && currentUser.role !== 'admin') {
+                showModal("Access Denied", "Only administrators can edit books.", false);
+                return;
+            }
+            const bookToEdit = books.find(book => book.id === bookId);
+            if (!bookToEdit) {
+                showModal("Error", "Book not found for editing.", false);
+                return;
+            }
+
+            document.getElementById('edit-book-id').value = bookToEdit.id;
+            document.getElementById('edit-book-title').value = bookToEdit.title;
+            document.getElementById('edit-book-author').value = bookToEdit.author;
+            document.getElementById('edit-book-isbn').value = bookToEdit.isbn;
+            document.getElementById('edit-book-publisher').value = bookToEdit.publisher;
+            document.getElementById('edit-book-pages').value = bookToEdit.pages;
+            document.getElementById('edit-book-stock').value = bookToEdit.stock;
+
+            document.getElementById('edit-book-modal').style.display = 'flex';
+        }
+
+        /**
+         * Handles the submission of the edit book form.
+         * @param {Event} event - The form submission event.
+         */
+        function saveEditedBook(event) {
+            event.preventDefault();
+            if (currentUser && currentUser.role !== 'admin') {
+                showModal("Access Denied", "Only administrators can save book changes.", false);
+                return;
+            }
+            const form = event.target;
+            const bookId = document.getElementById('edit-book-id').value;
+            const bookIndex = books.findIndex(book => book.id === bookId);
+
+            if (bookIndex === -1) {
+                showModal("Error", "Book not found for saving changes.", false);
+                return;
+            }
+
+            const updatedBook = {
+                id: bookId,
+                title: form['title'].value,
+                author: form['author'].value,
+                isbn: form['isbn'].value,
+                publisher: form['publisher'].value,
+                pages: parseInt(form['pages'].value),
+                stock: parseInt(form['stock'].value)
+            };
+
+            // Basic validation for stock
+            if (updatedBook.stock < 0) {
+                showModal("Error", "Stock cannot be negative.", false);
+                return;
+            }
+
+            // Check for duplicate ISBN, excluding the current book being edited
+            if (books.some(book => book.isbn === updatedBook.isbn && book.id !== updatedBook.id)) {
+                showModal("Error", "Another book with this ISBN already exists.", false);
+                return;
+            }
+
+            books[bookIndex] = updatedBook;
+            saveData();
+            renderBooksTable();
+            renderDashboard();
+            document.getElementById('edit-book-modal').style.display = 'none';
+            showModal("Success", `Book "${updatedBook.title}" updated successfully!`);
+        }
+
+        /**
+         * Confirms deletion of a book using a modal.
+         * @param {string} bookId - The ID of the book to delete.
+         * @param {string} bookTitle - The title of the book for the confirmation message.
+         */
+        function confirmDeleteBook(bookId, bookTitle) {
+            if (currentUser && currentUser.role !== 'admin') {
+                showModal("Access Denied", "Only administrators can delete books.", false);
+                return;
+            }
+            showModal("Confirmation", `Are you sure you want to delete book "${bookTitle}"? This action cannot be undone.`, true, () => deleteBook(bookId));
+        }
+
+        /**
+         * Deletes a book from the system.
+         * @param {string} bookId - The ID of the book to delete.
+         */
+        function deleteBook(bookId) {
+            // Check if the book is currently borrowed
+            const isBorrowed = transactions.some(t => t.bookId === bookId && !t.returnDate);
+            if (isBorrowed) {
+                showModal("Error", "Cannot delete book: It is currently borrowed.", false);
+                return;
+            }
+
+            const initialLength = books.length;
+            books = books.filter(book => book.id !== bookId);
+            if (books.length < initialLength) {
+                saveData();
+                renderBooksTable();
+                renderDashboard();
+                showModal("Success", "Book deleted successfully!");
+            } else {
+                showModal("Error", "Book not found.", false);
+            }
+        }
+
+        // --- Members Functions ---
+
+        /**
+         * Renders the members table, applying search filter if present.
+         */
+        function renderMembersTable() {
+            const tableBody = document.querySelector('#members-table tbody');
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            const searchTerm = document.getElementById('member-search').value.toLowerCase();
+
+            let filteredMembers = members.filter(member =>
+                member.name.toLowerCase().includes(searchTerm) ||
+                member.admissionNumber.toLowerCase().includes(searchTerm) ||
+                member.telephone.toLowerCase().includes(searchTerm) ||
+                (member.gender && member.gender.toLowerCase().includes(searchTerm)) || // New
+                (member.grade && member.grade.toLowerCase().includes(searchTerm)) // New
+            );
+
+            // If a student is logged in, they should only see their own details if they are registered as a member
+            if (currentUser && currentUser.role === 'student') {
+                filteredMembers = filteredMembers.filter(member => member.admissionNumber === currentUser.username); // Assuming username is admissionNumber for students
+            }
+
+
+            if (filteredMembers.length === 0) {
+                const row = tableBody.insertRow();
+                const cell = row.insertCell();
+                cell.colSpan = currentUser && currentUser.role === 'admin' ? 8 : 7; // Adjust colspan based on role (increased by 2 for gender, grade)
+                cell.textContent = "No members found.";
+                cell.className = "text-center text-gray-500 py-4";
+                return;
+            }
+
+            filteredMembers.forEach(member => {
+                const row = tableBody.insertRow();
+                const actionsHtml = currentUser && currentUser.role === 'admin' ? `
+                    <button onclick="openEditMemberModal('${member.admissionNumber}')" class="btn btn-secondary text-sm mr-2">Edit</button>
+                    <button onclick="confirmDeleteMember('${member.admissionNumber}', '${member.name}')" class="btn btn-danger text-sm">Delete</button>
+                ` : '';
+                row.innerHTML = `
+                    <td class="py-2 px-4">${member.name}</td>
+                    <td class="py-2 px-4">${member.admissionNumber}</td>
+                    <td class="py-2 px-4">${member.birthday}</td>
+                    <td class="py-2 px-4">${member.telephone}</td>
+                    <td class="py-2 px-4">${member.address}</td>
+                    <td class="py-2 px-4">${member.gender || 'N/A'}</td> <!-- New -->
+                    <td class="py-2 px-4">${member.grade || 'N/A'}</td>   <!-- New -->
+                    <td class="py-2 px-4 admin-only">${actionsHtml}</td>
+                `;
+                // Manually hide if not admin
+                if (currentUser && currentUser.role !== 'admin') {
+                    row.querySelector('.admin-only').style.display = 'none';
+                }
+            });
+        }
+
+        /**
+         * Handles the submission of the add member form.
+         * @param {Event} event - The form submission event.
+         */
+        function addMember(event) {
+            event.preventDefault();
+            if (currentUser && currentUser.role !== 'admin') {
+                showModal("Access Denied", "Only administrators can add members.", false);
+                return;
+            }
+            const form = event.target;
+            const newMember = {
+                // id: generateUniqueId(), // Member ID removed, using admissionNumber as effective ID
+                name: form['name'].value,
+                admissionNumber: form['admissionNumber'].value,
+                birthday: form['birthday'].value,
+                telephone: form['telephone'].value,
+                address: form['address'].value,
+                gender: form['gender'].value, // New
+                grade: form['grade'].value // New
+            };
+
+            // Check for duplicate admission number
+            if (members.some(member => member.admissionNumber === newMember.admissionNumber)) {
+                showModal("Error", "A member with this admission number already exists.", false);
+                return;
+            }
+
+            members.push(newMember);
+            saveData();
+            form.reset(); // Clear the form
+            renderMembersTable(); // Re-render the members table
+            renderDashboard(); // Update dashboard counts
+            showModal("Success", `Member "${newMember.name}" added successfully!`);
+            showSection('members-section'); // Navigate to members section
+        }
+
+        let originalMemberAdmissionNumber = null; // To store the original admission number during edit
+
+        /**
+         * Opens the edit member modal and populates it with member data.
+         * @param {string} admissionNumber - The admission number of the member to edit.
+         */
+        function openEditMemberModal(admissionNumber) {
+            if (currentUser && currentUser.role !== 'admin') {
+                showModal("Access Denied", "Only administrators can edit members.", false);
+                return;
+            }
+            const memberToEdit = members.find(member => member.admissionNumber === admissionNumber);
+            if (!memberToEdit) {
+                showModal("Error", "Member not found for editing.", false);
+                return;
+            }
+
+            originalMemberAdmissionNumber = admissionNumber; // Store the original for later lookup
+
+            document.getElementById('edit-member-name').value = memberToEdit.name;
+            document.getElementById('edit-member-admission-number').value = memberToEdit.admissionNumber;
+            document.getElementById('edit-member-birthday').value = memberToEdit.birthday;
+            document.getElementById('edit-member-telephone').value = memberToEdit.telephone;
+            document.getElementById('edit-member-address').value = memberToEdit.address;
+            document.getElementById('edit-member-gender').value = memberToEdit.gender || ''; // New
+            document.getElementById('edit-member-grade').value = memberToEdit.grade || ''; // New
+
+            document.getElementById('edit-member-modal').style.display = 'flex';
+        }
+
+        /**
+         * Handles the submission of the edit member form.
+         * @param {Event} event - The form submission event.
+         */
+        function saveEditedMember(event) {
+            event.preventDefault();
+            if (currentUser && currentUser.role !== 'admin') {
+                showModal("Access Denied", "Only administrators can save member changes.", false);
+                return;
+            }
+            const form = event.target;
+            const newAdmissionNumber = form['admissionNumber'].value;
+
+            // Find the member using the original admission number
+            const memberIndex = members.findIndex(member => member.admissionNumber === originalMemberAdmissionNumber);
+
+            if (memberIndex === -1) {
+                showModal("Error", "Member not found for saving changes.", false);
+                return;
+            }
+
+            const updatedMember = {
+                // id: members[memberIndex].id, // Keep old ID if it exists, though it's not used functionally
+                name: form['name'].value,
+                admissionNumber: newAdmissionNumber,
+                birthday: form['birthday'].value,
+                telephone: form['telephone'].value,
+                address: form['address'].value,
+                gender: form['gender'].value, // New
+                grade: form['grade'].value // New
+            };
+
+            // Check for duplicate admission number, excluding the current member being edited
+            if (members.some(member => member.admissionNumber === newAdmissionNumber && member.admissionNumber !== originalMemberAdmissionNumber)) {
+                showModal("Error", "Another member with this admission number already exists.", false);
+                return;
+            }
+
+            members[memberIndex] = updatedMember;
+            saveData();
+            renderMembersTable();
+            renderDashboard();
+            document.getElementById('edit-member-modal').style.display = 'none';
+            showModal("Success", `Member "${updatedMember.name}" updated successfully!`);
+            originalMemberAdmissionNumber = null; // Clear the stored original ID
+        }
+
+        /**
+         * Confirms deletion of a member using a modal.
+         * @param {string} admissionNumber - The admission number of the member to delete.
+         * @param {string} memberName - The name of the member for the confirmation message.
+         */
+        function confirmDeleteMember(admissionNumber, memberName) {
+            if (currentUser && currentUser.role !== 'admin') {
+                showModal("Access Denied", "Only administrators can delete members.", false);
+                return;
+            }
+            showModal("Confirmation", `Are you sure you want to delete member "${memberName}" (Admission No: ${admissionNumber})? This action cannot be undone.`, true, () => deleteMember(admissionNumber));
+        }
+
+        /**
+         * Deletes a member from the system.
+         * @param {string} admissionNumberToDelete - The admission number of the member to delete.
+         */
+        function deleteMember(admissionNumberToDelete) {
+            // Check if the member has any unreturned books
+            const hasBorrowedBooks = transactions.some(t => {
+                const member = members.find(m => m.admissionNumber === admissionNumberToDelete);
+                return member && t.recipientId === member.admissionNumber && t.recipientType === 'student' && !t.returnDate;
+            });
+
+            if (hasBorrowedBooks) {
+                showModal("Error", "Cannot delete member: They have unreturned books.", false);
+                return;
+            }
+
+            const initialLength = members.length;
+            members = members.filter(member => member.admissionNumber !== admissionNumberToDelete);
+            if (members.length < initialLength) {
+                saveData();
+                renderMembersTable();
+                renderDashboard();
+                showModal("Success", "Member deleted successfully!");
+            } else {
+                showModal("Error", "Member not found.", false);
+            }
+        }
+
+        // --- Teachers Functions ---
+        let originalTeacherTagNumber = null; // To store the original tag number during edit
+
+        /**
+         * Renders the teachers table, applying search filter if present.
+         */
+        function renderTeachersTable() {
+            const tableBody = document.querySelector('#teachers-table tbody');
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            const searchTerm = document.getElementById('teacher-search').value.toLowerCase();
+
+            const filteredTeachers = teachers.filter(teacher =>
+                teacher.tagName.toLowerCase().includes(searchTerm) ||
+                teacher.tagNumber.toLowerCase().includes(searchTerm) ||
+                teacher.grade.toLowerCase().includes(searchTerm)
+            );
+
+            if (filteredTeachers.length === 0) {
+                const row = tableBody.insertRow();
+                const cell = row.insertCell();
+                cell.colSpan = currentUser && currentUser.role === 'admin' ? 4 : 3; // Adjust colspan based on role
+                cell.textContent = "No teachers found.";
+                cell.className = "text-center text-gray-500 py-4";
+                return;
+            }
+
+            filteredTeachers.forEach(teacher => {
+                const row = tableBody.insertRow();
+                const actionsHtml = currentUser && currentUser.role === 'admin' ? `
+                    <button onclick="openEditTeacherModal('${teacher.tagNumber}')" class="btn btn-secondary text-sm mr-2">Edit</button>
+                    <button onclick="confirmDeleteTeacher('${teacher.tagNumber}', '${teacher.tagName}')" class="btn btn-danger text-sm">Delete</button>
+                ` : '';
+                row.innerHTML = `
+                    <td class="py-2 px-4">${teacher.tagName}</td>
+                    <td class="py-2 px-4">${teacher.tagNumber}</td>
+                    <td class="py-2 px-4">${teacher.grade}</td>
+                    <td class="py-2 px-4 admin-only">${actionsHtml}</td>
+                `;
+                // Manually hide if not admin, as display property is set by JS
+                if (currentUser && currentUser.role !== 'admin') {
+                    row.querySelector('.admin-only').style.display = 'none';
+                }
+            });
+        }
+
+        /**
+         * Handles the submission of the add teacher form.
+         * @param {Event} event - The form submission event.
+         */
+        function addTeacher(event) {
+            event.preventDefault();
+            if (currentUser && currentUser.role !== 'admin') {
+                showModal("Access Denied", "Only administrators can add teachers.", false);
+                return;
+            }
+            const form = event.target;
+            const newTeacher = {
+                tagName: form['tagName'].value.trim(),
+                tagNumber: form['tagNumber'].value.trim(),
+                grade: form['grade'].value.trim()
+            };
+
+            if (!newTeacher.tagName || !newTeacher.tagNumber || !newTeacher.grade) {
+                showModal("Error", "All teacher fields are required.", false);
+                return;
+            }
+
+            // Check for duplicate tag number
+            if (teachers.some(teacher => teacher.tagNumber === newTeacher.tagNumber)) {
+                showModal("Error", "A teacher with this Tag Number already exists.", false);
+                return;
+            }
+
+            teachers.push(newTeacher);
+            saveData();
+            form.reset(); // Clear the form
+            renderTeachersTable(); // Re-render the teachers table
+            showModal("Success", `Teacher "${newTeacher.tagName}" added successfully!`);
+            showSection('teachers-section'); // Navigate to teachers section
+        }
+
+        /**
+         * Opens the edit teacher modal and populates it with teacher data.
+         * @param {string} tagNumber - The tag number of the teacher to edit.
+         */
+        function openEditTeacherModal(tagNumber) {
+            if (currentUser && currentUser.role !== 'admin') {
+                showModal("Access Denied", "Only administrators can edit teachers.", false);
+                return;
+            }
+            const teacherToEdit = teachers.find(teacher => teacher.tagNumber === tagNumber);
+            if (!teacherToEdit) {
+                showModal("Error", "Teacher not found for editing.", false);
+                return;
+            }
+
+            originalTeacherTagNumber = tagNumber; // Store the original for later lookup
+
+            document.getElementById('edit-teacher-tag-name').value = teacherToEdit.tagName;
+            document.getElementById('edit-teacher-tag-number').value = teacherToEdit.tagNumber;
+            document.getElementById('edit-teacher-grade').value = teacherToEdit.grade;
+            document.getElementById('edit-teacher-original-tag-number').value = teacherToEdit.tagNumber; // Set hidden field
+
+            document.getElementById('edit-teacher-modal').style.display = 'flex';
+        }
+
+        /**
+         * Handles the submission of the edit teacher form.
+         * @param {Event} event - The form submission event.
+         */
+        function saveEditedTeacher(event) {
+            event.preventDefault();
+            if (currentUser && currentUser.role !== 'admin') {
+                showModal("Access Denied", "Only administrators can save teacher changes.", false);
+                return;
+            }
+            const form = event.target;
+            const originalTagNumber = document.getElementById('edit-teacher-original-tag-number').value;
+            const newTagNumber = form['tagNumber'].value.trim();
+
+            const teacherIndex = teachers.findIndex(teacher => teacher.tagNumber === originalTagNumber);
+
+            if (teacherIndex === -1) {
+                showModal("Error", "Teacher not found for saving changes.", false);
+                return;
+            }
+
+            const updatedTeacher = {
+                tagName: form['tagName'].value.trim(),
+                tagNumber: newTagNumber,
+                grade: form['grade'].value.trim()
+            };
+
+            // Check for duplicate tag number, excluding the current teacher being edited
+            if (teachers.some(teacher => teacher.tagNumber === newTagNumber && teacher.tagNumber !== originalTagNumber)) {
+                showModal("Error", "Another teacher with this Tag Number already exists.", false);
+                return;
+            }
+
+            teachers[teacherIndex] = updatedTeacher;
+            saveData();
+            renderTeachersTable();
+            document.getElementById('edit-teacher-modal').style.display = 'none';
+            showModal("Success", `Teacher "${updatedTeacher.tagName}" updated successfully!`);
+            originalTeacherTagNumber = null; // Clear the stored original ID
+        }
+
+        /**
+         * Confirms deletion of a teacher using a modal.
+         * @param {string} tagNumber - The tag number of the teacher to delete.
+         * @param {string} tagName - The name of the teacher for the confirmation message.
+         */
+        function confirmDeleteTeacher(tagNumber, tagName) {
+            if (currentUser && currentUser.role !== 'admin') {
+                showModal("Access Denied", "Only administrators can delete teachers.", false);
+                return;
+            }
+            // Check if the teacher has any unreturned books
+            const hasBorrowedBooks = transactions.some(t => t.recipientId === tagNumber && t.recipientType === 'teacher' && !t.returnDate);
+            if (hasBorrowedBooks) {
+                showModal("Error", "Cannot delete teacher: They have unreturned books.", false);
+                return;
+            }
+
+            showModal("Confirmation", `Are you sure you want to delete teacher "${tagName}" (Tag No: ${tagNumber})? This action cannot be undone.`, true, () => deleteTeacher(tagNumber));
+        }
+
+        /**
+         * Deletes a teacher from the system.
+         * @param {string} tagNumberToDelete - The tag number of the teacher to delete.
+         */
+        function deleteTeacher(tagNumberToDelete) {
+            const initialLength = teachers.length;
+            teachers = teachers.filter(teacher => teacher.tagNumber !== tagNumberToDelete);
+            if (teachers.length < initialLength) {
+                saveData();
+                renderTeachersTable();
+                showModal("Success", "Teacher deleted successfully!");
+            } else {
+                showModal("Error", "Teacher not found.", false);
+            }
+        }
+
+        // --- Issue/Return Book Functions ---
+
+        /**
+         * Populates the book and recipient dropdowns for the issue book form.
+         */
+        function renderIssueBookForm() {
+            const bookSelect = document.getElementById('issue-book-select');
+            const recipientSelect = document.getElementById('issue-recipient-select');
+
+            // Clear previous options
+            bookSelect.innerHTML = '<option value="">-- Select a Book --</option>';
+            recipientSelect.innerHTML = '<option value="">-- Select a Recipient --</option>';
+
+            // Populate book options (only books with stock > 0)
+            books.filter(book => book.stock > 0).forEach(book => {
+                const option = document.createElement('option');
+                option.value = book.id;
+                option.textContent = `${book.title} (${book.stock} in stock)`;
+                bookSelect.appendChild(option);
+            });
+
+            // Populate recipient options with both members and teachers
+            if (currentUser && currentUser.role === 'admin') {
+                // Admin sees all members and teachers
+                members.forEach(member => {
+                    const option = document.createElement('option');
+                    option.value = `student-${member.admissionNumber}`; // Prefix to distinguish
+                    option.textContent = `${member.name} (Student - Adm No: ${member.admissionNumber})`;
+                    recipientSelect.appendChild(option);
+                });
+                teachers.forEach(teacher => {
+                    const option = document.createElement('option');
+                    option.value = `teacher-${teacher.tagNumber}`; // Prefix to distinguish
+                    option.textContent = `${teacher.tagName} (Teacher - Tag No: ${teacher.tagNumber})`;
+                    recipientSelect.appendChild(option);
+                });
+            } else if (currentUser && currentUser.role === 'student') {
+                // Student sees only themselves if registered as a member
+                const studentMember = members.find(m => m.admissionNumber === currentUser.username);
+                if (studentMember) {
+                    const option = document.createElement('option');
+                    option.value = `student-${studentMember.admissionNumber}`;
+                    option.textContent = `${studentMember.name} (Student - Adm No: ${studentMember.admissionNumber})`;
+                    recipientSelect.appendChild(option);
+                } else {
+                    recipientSelect.innerHTML = '<option value="">-- No member record found for your account --</option>';
+                    recipientSelect.disabled = true; // Disable if no member record
+                    showModal("Info", "Your student account is not linked to a member record. Please contact an administrator.", false);
+                }
+            }
+        }
+
+        /**
+         * Handles the submission of the issue book form.
+         * @param {Event} event - The form submission event.
+         */
+        function issueBook(event) {
+            event.preventDefault();
+            const transactionIdInput = document.getElementById('transaction-id');
+            const bookId = document.getElementById('issue-book-select').value;
+            const selectedRecipientValue = document.getElementById('issue-recipient-select').value;
+
+            let transactionId = transactionIdInput.value.trim();
+            if (!transactionId) {
+                transactionId = generateUniqueId();
+            }
+
+            if (!bookId || !selectedRecipientValue) {
+                showModal("Error", "Please select both a book and a recipient.", false);
+                return;
+            }
+
+            const [recipientType, recipientId] = selectedRecipientValue.split('-');
+
+            if (currentUser && currentUser.role === 'student' && (recipientType !== 'student' || recipientId !== currentUser.username)) {
+                 showModal("Access Denied", "Students can only issue books to themselves.", false);
+                 return;
+            }
+
+            // Check for duplicate transaction ID
+            if (transactions.some(t => t.id === transactionId)) {
+                showModal("Error", `Transaction ID "${transactionId}" already exists. Please use a different ID or leave it blank to auto-generate.`, false);
+                return;
+            }
+
+            const book = books.find(b => b.id === bookId);
+            let recipient = null;
+            if (recipientType === 'student') {
+                recipient = members.find(m => m.admissionNumber === recipientId);
+            } else if (recipientType === 'teacher') {
+                recipient = teachers.find(t => t.tagNumber === recipientId);
+            }
+
+            if (!book || !recipient) {
+                showModal("Error", "Selected book or recipient not found.", false);
+                return;
+            }
+
+            if (book.stock <= 0) {
+                showModal("Error", `"${book.title}" is out of stock.`, false);
+                return;
+            }
+
+            // Decrement book stock
+            book.stock--;
+
+            // Create new transaction
+            const newTransaction = {
+                id: transactionId,
+                bookId: book.id,
+                recipientId: recipientId, // Store recipient's unique ID
+                recipientType: recipientType, // Store recipient's type
+                issueDate: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
+                returnDate: null, // Null until returned
+                status: 'Borrowed'
+            };
+            transactions.push(newTransaction);
+
+            saveData();
+            renderBooksTable(); // Update book stock display
+            renderTransactionsTable(); // Add new transaction to table
+            renderDashboard(); // Update dashboard counts
+            document.getElementById('issue-book-form').reset(); // Clear the form
+            renderIssueBookForm(); // Re-populate dropdowns
+            showModal("Success", `"${book.title}" issued to "${recipient.name || recipient.tagName}" successfully with Transaction ID: ${newTransaction.id}!`);
+            showSection('transactions-section'); // Navigate to transactions section
+        }
+
+        /**
+         * Renders the transactions table.
+         */
+        function renderTransactionsTable() {
+            const tableBody = document.querySelector('#transactions-table tbody');
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            let filteredTransactions = transactions;
+
+            // If a student is logged in, show only their transactions
+            if (currentUser && currentUser.role === 'student') {
+                filteredTransactions = transactions.filter(t => t.recipientType === 'student' && t.recipientId === currentUser.username);
+            }
+
+            if (filteredTransactions.length === 0) {
+                const row = tableBody.insertRow();
+                const cell = row.insertCell();
+                cell.colSpan = currentUser && currentUser.role === 'admin' ? 8 : 7; // Adjust colspan based on role
+                cell.textContent = "No transactions recorded.";
+                cell.className = "text-center text-gray-500 py-4";
+                return;
+            }
+
+            filteredTransactions.forEach(transaction => {
+                const book = books.find(b => b.id === transaction.bookId);
+                let recipientName = 'Unknown';
+                let recipientIdentifier = transaction.recipientId || 'N/A';
+
+                if (transaction.recipientType === 'student') {
+                    const member = members.find(m => m.admissionNumber === transaction.recipientId);
+                    recipientName = member ? member.name : 'Unknown Student';
+                    recipientIdentifier = `Adm No: ${transaction.recipientId}`;
+                } else if (transaction.recipientType === 'teacher') {
+                    const teacher = teachers.find(t => t.tagNumber === transaction.recipientId);
+                    recipientName = teacher ? teacher.tagName : 'Unknown Teacher';
+                    recipientIdentifier = `Tag No: ${transaction.recipientId}`;
+                }
+
+                const bookTitle = book ? book.title : 'Unknown Book';
+                const returnDateDisplay = transaction.returnDate || 'N/A';
+                const statusClass = transaction.status === 'Borrowed' ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold';
+                const actionButton = (currentUser && currentUser.role === 'admin' && transaction.status === 'Borrowed') ?
+                    `<button onclick="confirmReturnBook('${transaction.id}', '${bookTitle}')" class="btn btn-success text-sm">Return</button>` :
+                    (currentUser && currentUser.role === 'student' && transaction.status === 'Borrowed' && transaction.recipientType === 'student' && transaction.recipientId === currentUser.username ?
+                    `<button onclick="confirmReturnBook('${transaction.id}', '${bookTitle}')" class="btn btn-success text-sm">Return</button>` :
+                    '');
+
+
+                const row = tableBody.insertRow();
+                row.innerHTML = `
+                    <td class="py-2 px-4">${transaction.id}</td>
+                    <td class="py-2 px-4">${bookTitle}</td>
+                    <td class="py-2 px-4">${recipientName} (${recipientIdentifier})</td>
+                    <td class="py-2 px-4">${transaction.recipientType}</td>
+                    <td class="py-2 px-4">${transaction.issueDate}</td>
+                    <td class="py-2 px-4">${returnDateDisplay}</td>
+                    <td class="py-2 px-4"><span class="${statusClass}">${transaction.status}</span></td>
+                    <td class="py-2 px-4 admin-only">${actionButton}</td>
+                `;
+                // Manually hide if not admin or if action button is student's but conditions not met
+                const actionCell = row.querySelector('.admin-only');
+                if (actionCell && (currentUser.role !== 'admin' && actionButton === '')) {
+                     actionCell.style.display = 'none';
+                }
+            });
+        }
+
+        /**
+         * Confirms returning a book using a modal.
+         * @param {string} transactionId - The ID of the transaction to update.
+         * @param {string} bookTitle - The title of the book for the confirmation message.
+         */
+        function confirmReturnBook(transactionId, bookTitle) {
+            const transaction = transactions.find(t => t.id === transactionId);
+            if (!transaction) {
+                showModal("Error", "Transaction not found.", false);
+                return;
+            }
+            // Students can only return their own student-borrowed books
+            if (currentUser.role === 'student' && (transaction.recipientType !== 'student' || transaction.recipientId !== currentUser.username)) {
+                showModal("Access Denied", "You can only return books that you have borrowed.", false);
+                return;
+            }
+
+            showModal("Confirmation", `Are you sure you want to mark "${bookTitle}" as returned?`, true, () => returnBook(transactionId));
+        }
+
+        /**
+         * Marks a book as returned, updates stock and transaction status.
+         * @param {string} transactionId - The ID of the transaction to update.
+         */
+        function returnBook(transactionId) {
+            const transactionIndex = transactions.findIndex(t => t.id === transactionId);
+            if (transactionIndex === -1) {
+                showModal("Error", "Transaction not found.", false);
+                return;
+            }
+
+            const transaction = transactions[transactionIndex];
+            if (transaction.status === 'Returned') {
+                showModal("Info", "This book has already been returned.", false);
+                return;
+            }
+
+            // Ensure only authorized users can return
+            if (currentUser.role === 'student' && (transaction.recipientType !== 'student' || transaction.recipientId !== currentUser.username)) {
+                showModal("Access Denied", "You cannot return books borrowed by others.", false);
+                return;
+            }
+
+
+            const book = books.find(b => b.id === transaction.bookId);
+            if (book) {
+                book.stock++; // Increment book stock
+            } else {
+                console.warn(`Book with ID ${transaction.bookId} not found for return transaction ${transaction.id}. Stock not updated.`);
+            }
+
+            transaction.returnDate = new Date().toISOString().split('T')[0]; // Set current date as return date
+            transaction.status = 'Returned';
+
+            saveData();
+            renderBooksTable(); // Update book stock display
+            renderTransactionsTable(); // Update transaction status
+            renderDashboard(); // Update dashboard counts
+            showModal("Success", `Book "${book ? book.title : 'Unknown'}" returned successfully!`);
+        }
+
+        // --- Modal Functions ---
+
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const modalMessage = document.getElementById('modal-message');
+        const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+        const modalCancelBtn = document.getElementById('modal-cancel-btn');
+        const closeButtons = document.querySelectorAll('.close-button'); // For all modals
+
+        let currentConfirmAction = null; // Stores the function to call on confirmation
+
+        /**
+         * Displays a custom modal message.
+         * @param {string} title - The title of the modal.
+         * @param {string} message - The message to display.
+         * @param {boolean} isConfirm - If true, shows confirm/cancel buttons; otherwise, just an OK button.
+         * @param {Function} onConfirm - Callback function to execute if confirmed (only for isConfirm=true).
+         */
+        function showModal(title, message, isConfirm = false, onConfirm = null) {
+            document.querySelector('#confirmation-modal .modal-content h3').textContent = title;
+            modalMessage.textContent = message;
+
+            if (isConfirm) {
+                modalConfirmBtn.style.display = 'inline-block';
+                modalCancelBtn.style.display = 'inline-block';
+                currentConfirmAction = onConfirm;
+                modalConfirmBtn.onclick = () => {
+                    if (currentConfirmAction) {
+                        currentConfirmAction();
+                    }
+                    confirmationModal.style.display = 'none';
+                    currentConfirmAction = null; // Clear action after execution
+                };
+                modalCancelBtn.onclick = () => {
+                    confirmationModal.style.display = 'none';
+                    currentConfirmAction = null; // Clear action
+                };
+            } else {
+                modalConfirmBtn.style.display = 'none';
+                modalCancelBtn.style.display = 'none';
+                // For info/error messages, we can make the close button act as an OK
+                document.querySelector('#confirmation-modal .close-button').onclick = () => confirmationModal.style.display = 'none';
+            }
+
+            confirmationModal.style.display = 'flex';
+        }
+
+        // Close modal when clicking on the close button (for all modals)
+        closeButtons.forEach(button => {
+            button.onclick = function() {
+                this.closest('.modal').style.display = 'none';
+            };
+        });
+
+        // Close modal when clicking outside of the modal content (for all modals)
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        };
+
+
+        // --- Event Listeners and Initial Load ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData(); // Load data when the page loads
+
+            // Authentication form listeners
+            toggleAuthLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                toggleAuthMode();
+            });
+            authForm.addEventListener('submit', handleAuthSubmit);
+
+            // Set up navigation listeners
+            document.getElementById('nav-dashboard').addEventListener('click', () => showSection('dashboard-section'));
+            document.getElementById('nav-books').addEventListener('click', () => showSection('books-section'));
+            document.getElementById('nav-add-book').addEventListener('click', () => {
+                 if (currentUser && currentUser.role !== 'admin') {
+                     showModal("Access Denied", "Only administrators can add books.", false);
+                     return;
+                 }
+                 showSection('add-book-section');
+             });
+            document.getElementById('nav-issue-book').addEventListener('click', () => showSection('issue-book-section'));
+            document.getElementById('nav-members').addEventListener('click', () => {
+                 if (currentUser && currentUser.role !== 'admin') {
+                     showModal("Access Denied", "Only administrators can view and manage all members.", false);
+                     // Students can view their own details in "Members" by filtering
+                     showSection('members-section');
+                     return;
+                 }
+                 showSection('members-section');
+             });
+            document.getElementById('nav-add-member').addEventListener('click', () => {
+                 if (currentUser && currentUser.role !== 'admin') {
+                     showModal("Access Denied", "Only administrators can add members.", false);
+                     return;
+                 }
+                 showSection('add-member-section');
+             });
+            document.getElementById('nav-teachers').addEventListener('click', () => { // New: Teachers nav
+                 if (currentUser && currentUser.role !== 'admin') {
+                     showModal("Access Denied", "Only administrators can view and manage teachers.", false);
+                     return;
+                 }
+                 showSection('teachers-section');
+             });
+            document.getElementById('nav-add-teacher').addEventListener('click', () => { // New: Add Teacher nav
+                 if (currentUser && currentUser.role !== 'admin') {
+                     showModal("Access Denied", "Only administrators can add teachers.", false);
+                     return;
+                 }
+                 showSection('add-teacher-section');
+             });
+            document.getElementById('nav-transactions').addEventListener('click', () => showSection('transactions-section'));
+            document.getElementById('nav-logout').addEventListener('click', logout);
+
+
+            // Form submissions
+            document.getElementById('add-book-form').addEventListener('submit', addBook);
+            document.getElementById('add-member-form').addEventListener('submit', addMember);
+            document.getElementById('issue-book-form').addEventListener('submit', issueBook);
+            document.getElementById('edit-book-form').addEventListener('submit', saveEditedBook);
+            document.getElementById('edit-member-form').addEventListener('submit', saveEditedMember);
+            document.getElementById('add-teacher-form').addEventListener('submit', addTeacher); // New: Add Teacher form submit
+            document.getElementById('edit-teacher-form').addEventListener('submit', saveEditedTeacher); // New: Edit Teacher form submit
+
+
+            // Search bar listeners (re-render table on input change)
+            document.getElementById('book-search').addEventListener('input', renderBooksTable);
+            document.getElementById('member-search').addEventListener('input', renderMembersTable);
+            document.getElementById('teacher-search').addEventListener('input', renderTeachersTable); // New: Teacher search
+
+            // Check for logged-in user on load
+            const storedUser = localStorage.getItem('currentUser');
+            if (storedUser) {
+                currentUser = JSON.parse(storedUser);
+                showMainApp();
+            } else {
+                showAuthPage();
+            }
+
+            // Initial render of the dashboard if logged in
+            if (currentUser) {
+                renderDashboard();
+                showSection('dashboard-section'); // Show dashboard by default
+            }
+        });
+    </script>
+</body>
+</html>
